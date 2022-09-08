@@ -10,14 +10,27 @@
 #include "config.h"
 #include <WiFi.h>
 
+// millis
+long long lastSend;
+long long sendDelay = 1000; // 100 ms
+long long lastMqttReconnect;
+long long mqttReconnectDelay = 5000; // 5 s
+long long lastReadPotentiometer;
+long long readPotentiometerDelay = 100; // 100 ms
+
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwmServo = Adafruit_PWMServoDriver();
-
+#define SERVOMIN 100  // Minimum pulse length count out of 4096.
+#define SERVOMAX 2400 // Maximum pulse length count out of 4096.
+int servoNo = 3;      // Defines a counter for servos. count0-n
+int servoNoMax = 3;   // maximum n servo
+int checkStatusServo = 0;
 float accX = 0.0F, accY = 0.0F, accZ = 0.0F, gyroX = 0.0F, gyroY = 0.0F, gyroZ = 0.0F, pitch = 0.0F, roll = 0.0F, yaw = 0.0F;
 float remindGyroX = 0.0F, remindGyroY = 0.0F, remindGyroZ = 0.0F;
 float calGyroX = 0.0F, calGyroY = 0.0F, calGyroZ = 0.0F;
 int freqServo = 60;
 static float temp = 0;
+float amplify = 5;
 
 // WIFI
 const char *ssid = WIFI_SSID;
@@ -39,6 +52,9 @@ void callback(char *topic, byte *payload, unsigned int length);
 
 void sendGyroMQTT(float, float, float);
 void sendPotentialMQTT();
+void sendIsGrasp();
+
+bool isGrasp = false;
 
 // Read data
 void readGyro();
@@ -52,6 +68,11 @@ int finger0 = 0, finger1 = 0, finger2 = 0, finger3 = 0;
 int finger0min = 15, finger1min = 15, finger2min = 15, finger3min = 15;
 int finger0max = 11000, finger1max = 13000, finger2max = 9000, finger3max = 9220;
 int16_t adc0, adc1, adc2, adc3;
+
+// Collision
+void isLockServo();
+
+String isCollision;
 
 void setup()
 {
@@ -78,19 +99,19 @@ void loop()
   if (!mqtt.connected())
   {
     reconnect();
+    mqtt.subscribe(TOPIC_COLLISION);
   }
   mqtt.loop();
   calibrateGyro();
   readPotential();
-  sendGyroMQTT(calGyroX, calGyroY, calGyroZ);
+  sendGyroMQTT(gyroX, gyroY, gyroZ);
   sendPotentialMQTT();
+  isLockServo();
+  sendIsGrasp();
   delay(100);
 }
 void calibrateGyro()
 {
-  calGyroX = gyroX - remindGyroX;
-  calGyroY = gyroY - remindGyroY;
-  calGyroZ = gyroZ - remindGyroZ;
   remindGyroX = gyroX;
   remindGyroY = gyroY;
   remindGyroZ = gyroZ;
@@ -144,16 +165,16 @@ void setup_wifi()
   Serial.println(WiFi.localIP());
 }
 
+String message;
 void callback(char *topic, byte *payload, unsigned int length)
 {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
   for (int i = 0; i < length; i++)
   {
-    Serial.print((char)payload[i]);
+    message += (char)payload[i];
   }
-  Serial.println();
+
+  isCollision = message;
+  message = "";
 }
 
 void reconnect()
@@ -167,12 +188,6 @@ void reconnect()
     if (mqtt.connect(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD))
     {
       Serial.println("connected");
-
-      // char topic[40];
-      // sprintf(topic,"%s/#", MQTT_TOPIC_PREFIX);
-
-      // client.subscribe(topic);
-      // Serial.println("subscribed");
     }
     else
     {
@@ -187,12 +202,13 @@ void reconnect()
 
 void sendGyroMQTT(float gyroX, float gyroY, float gyroZ)
 {
-  packageGyro["X"] = String(calGyroX);
-  packageGyro["accX"] = String(accX);
-  packageGyro["Y"] = String(calGyroY);
-  packageGyro["accY"] = String(accY);
-  packageGyro["Z"] = String(calGyroZ);
-  packageGyro["accZ"] = String(accZ);
+  gyroX *= amplify;
+  gyroY *= amplify;
+  gyroZ *= amplify;
+
+  packageGyro["X"] = String(gyroX);
+  packageGyro["Y"] = String(gyroY);
+  packageGyro["Z"] = String(gyroZ);
 
   String jsonString = JSON.stringify(packageGyro);
   mqtt.publish(TOPIC_GYRO, jsonString.c_str());
@@ -222,4 +238,36 @@ void readPotential()
   // finger1 = map(adc1, finger1min, finger1max, 0, 1024);
   // finger2 = map(adc2, finger2min, finger2max, 0, 1024);
   // finger3 = map(adc3, finger3min, finger3max, 0, 1024);
+}
+
+void isLockServo()
+{
+  if (isCollision == "1")
+  {
+    // ใส่โค้ดล็อค Servo
+    for (int pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--)
+      pwmServo.setPWM(servoNo, 0, pulselen);
+    delay(300);
+  }
+  else if (isCollision == "0")
+  {
+    // ใส่โค้ดปลดล็อค Servo
+    for (int pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--)
+      pwmServo.setPWM(servoNo, 0, pulselen);
+    delay(300);
+  }
+}
+
+void sendIsGrasp()
+{
+  if (finger0 > 100 && finger1 > 100 && finger2 > 100 && finger3 > 100 && checkStatusServo == 0)
+  {
+    mqtt.publish(TOPIC_GRASP, "1");
+  }
+  else if (finger0 < 100 && finger1 < 100 && finger2 < 100 && finger3 < 100 && checkStatusServo == 1)
+  {
+    mqtt.publish(TOPIC_GRASP, "0");
+    checkStatusServo = 0;
+    isCollision = "0";
+  }
 }
