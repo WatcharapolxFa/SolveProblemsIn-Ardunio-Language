@@ -1,10 +1,9 @@
 // WiFi Credential
-#define WIFI_SSID "Oatpt"
-#define WIFI_PASSWD "23456789"
-
+#define WIFI_SSID "Faax"
+#define WIFI_PASSWD "110445ff"
 
 // MQTT
-#define MQTT_TOPIC_PREFIX  "topgun/team1"
+#define MQTT_TOPIC_PREFIX "topgun/team1"
 #define MQTT_CLIENT_ID "M5Stick"
 #define MQTT_SERVER "154.215.14.239"
 #define MQTT_USERNAME "KMITL-01"
