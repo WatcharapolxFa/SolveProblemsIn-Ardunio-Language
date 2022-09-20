@@ -22,6 +22,7 @@ void notification();
 void servo();
 void readDistance();
 
+
 void setup()
 {
   Serial.begin(115200); // Starts the serial communication
@@ -39,6 +40,25 @@ void setup()
 }
 void loop()
 {
+  readDistance();
+  if (state == true)
+  {
+    servo();
+    state = false;
+    stateLed = true;
+  }
+  else if (state == false && stateLed == true)
+  {
+    notification();
+    stateLed = false;
+  }
+}
+
+
+
+
+void readDistance()
+{
   // Clears the trigPin
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
@@ -55,20 +75,38 @@ void loop()
   Serial.println(distance);
   if (distance <= 45)
   {
-    Serial.println("Bin on");
+    state = true;
+  }
+}
+
+
+
+void servo()
+{
+  bool stateonoff = true;
+  if (stateonoff == true)
+  {
     digitalWrite(LedRed, LOW);
     digitalWrite(LedGreen, LOW);
     digitalWrite(LedYellow, HIGH);
     myservo.write(160);
-    delay(5000);
-    Serial.println("Bin off");
+    delay(3000);
+
+    stateonoff = false;
+  }
+  else if (stateonoff == false)
+  {
     digitalWrite(LedRed, LOW);
     digitalWrite(LedGreen, LOW);
     digitalWrite(LedYellow, LOW);
     myservo.write(0);
     delay(300);
   }
-  int readIr = analogRead(IrPin);
+}
+
+void notification()
+{
+   int readIr = analogRead(IrPin);
   Serial.print("Ir = ");
   Serial.println(readIr);
   if (readIr == 0)
@@ -76,6 +114,7 @@ void loop()
     digitalWrite(LedRed, HIGH);
     digitalWrite(LedGreen, LOW);
     digitalWrite(LedYellow, LOW);
+    delay(300);
   }
 
   else if (readIr == 1)
@@ -83,5 +122,6 @@ void loop()
     digitalWrite(LedRed, LOW);
     digitalWrite(LedGreen, HIGH);
     digitalWrite(LedYellow, LOW);
+    delay(300);
   }
 }
