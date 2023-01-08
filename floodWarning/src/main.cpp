@@ -35,7 +35,7 @@ const char *pass = "240348131095";
                       index 5 : น้ำท่วมระดับ 5  */
 const long flood_level_cm[6] = {0, 10, 20, 30, 40, 50};
 
-#define SENSOR_DISTANCE (81) //(100) // ระยะจากพื้นถึง sensor (cm)
+#define SENSOR_DISTANCE (41) //(100) // ระยะจากพื้นถึง sensor (cm)
 
 // ###################################################################
 
