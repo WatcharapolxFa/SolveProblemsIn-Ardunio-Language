@@ -14,7 +14,6 @@ int Relay1 = D3;
 #define BUZZER_OFF 1
 #define BUZZER_ON 0
 
-
 unsigned char flooding_level;
 
 /* ตั้งค่าระดับน้ำ (cm) ->  index 0 : ไม่มีน้ำท่วม
@@ -30,8 +29,8 @@ const long flood_level_cm[6] = {0, 10, 20, 30, 40, 50};
 void setup()
 {
   Serial.begin(9600);
-  pinMode(Relay1 , OUTPUT);
-  digitalWrite(Relay1 , BUZZER_OFF);
+  pinMode(Relay1, OUTPUT);
+  digitalWrite(Relay1, BUZZER_OFF);
   WiFi.begin(ssid, pass);
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -55,18 +54,18 @@ unsigned char buzzer_timer;
 void level_mng(long cm)
 {
   long level_dif;
-  //flooding_level_buf = 0
+  // flooding_level_buf = 0
   unsigned char flooding_level_buf = flooding_level;
   bool flag_line_send = 0;
   String msg;
-  //SENSOR_DISTANCE = ระยะห่างของ sensor ที่เราตั้งไว้(ความสูง)
+  // SENSOR_DISTANCE = ระยะห่างของ sensor ที่เราตั้งไว้(ความสูง)
   level_dif = SENSOR_DISTANCE - cm;
 
   Serial.print("Flooding Level: ");
-  //แสดงผลบรรทัดที่ 62 
+  // แสดงผลบรรทัดที่ 62
   Serial.print(level_dif);
   Serial.println(" cm");
- // ไม่่มีทางเข้าเงื่อนไขนี้เพราะค่าเริ่มต้นเป็น 0 ไม่มีทางน้อยกว่า
+  // ไม่่มีทางเข้าเงื่อนไขนี้เพราะค่าเริ่มต้นเป็น 0 ไม่มีทางน้อยกว่า
   if (level_dif < 0)
     flooding_level = 0;
   else
@@ -128,11 +127,11 @@ void level_mng(long cm)
   {
     if (buzzer_timer <= 5) // 1 sec
     {
-      digitalWrite(Relay1 , BUZZER_ON);
+      digitalWrite(Relay1, BUZZER_ON);
     }
     else if (buzzer_timer <= 10)
     {
-      digitalWrite(Relay1 , BUZZER_OFF);
+      digitalWrite(Relay1, BUZZER_OFF);
     }
     else
       buzzer_timer = 0;
@@ -141,7 +140,7 @@ void level_mng(long cm)
   }
   else
   {
-    digitalWrite(Relay1 , BUZZER_OFF);
+    digitalWrite(Relay1, BUZZER_OFF);
     buzzer_timer = 0;
   }
 
