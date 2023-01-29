@@ -39,6 +39,7 @@ int arr[3][2] = {
 long countTimeOne = 0;
 long countTimeTwo = 0;
 long countTimeThree = 0;
+long countTimeFour = 0;
 long sumTime = 0;
 
 
@@ -122,11 +123,16 @@ void loop()
           countTimeThree = millis();
         }
         else if(step == 3){
+          countTimeFour = millis();
+        }
+        else if(step == 4){
           countTimeThree = 0 ;
           countTimeTwo = 0 ;
           countTimeOne = 0 ;
+          countTimeFour = 0 ;
           step = 0;
         }
+
         // Serial.println(ranLed);
         arr[ranLed - 8][1] = 1;
       }
@@ -163,7 +169,14 @@ void loop()
         countTimeThree = millis() - countTimeThree;
         Serial.print("countTimeThree : ");
         Serial.println(countTimeThree);
-        sumTime = (countTimeOne + countTimeTwo + countTimeThree)/3000 ; 
+        lcd_1.print(" mS ");
+        step = 3 ;
+      }
+      else if(step == 3 ){
+        countTimeFour = millis() - countTimeFour;
+        Serial.print("countTimeFour : ");
+        Serial.println(countTimeFour);
+        sumTime = (countTimeFour + countTimeTwo + countTimeThree)/3000 ; 
         lcd_1.clear();
         lcd_1.setCursor(0 , 0);
         lcd_1.print("sumTime :  ");
@@ -175,7 +188,8 @@ void loop()
         countTimeThree = 0 ;
         countTimeTwo = 0 ;
         countTimeOne = 0 ;
-        step = 3 ;
+        countTimeFour = 0 ;
+        step = 4 ;
       }
     }
     else if (arr[1][1] == 1 && bt2 == 1 && isActive == 1)
@@ -183,7 +197,7 @@ void loop()
       digitalWrite(LedTwo, LOW);
       arr[1][1] = 0;
       isActive = 0;
-      if(step == 0 ){
+           if(step == 0 ){
         countTimeOne = millis() - countTimeOne;
         lcd_1.clear();
         lcd_1.setCursor(0 , 0);
@@ -209,7 +223,14 @@ void loop()
         countTimeThree = millis() - countTimeThree;
         Serial.print("countTimeThree : ");
         Serial.println(countTimeThree);
-        sumTime = (countTimeOne + countTimeTwo + countTimeThree)/3000 ; 
+        lcd_1.print(" mS ");
+        step = 3 ;
+      }
+      else if(step == 3 ){
+        countTimeFour = millis() - countTimeFour;
+        Serial.print("countTimeFour : ");
+        Serial.println(countTimeFour);
+        sumTime = (countTimeFour + countTimeTwo + countTimeThree)/3000 ; 
         lcd_1.clear();
         lcd_1.setCursor(0 , 0);
         lcd_1.print("sumTime :  ");
@@ -221,7 +242,8 @@ void loop()
         countTimeThree = 0 ;
         countTimeTwo = 0 ;
         countTimeOne = 0 ;
-        step = 3 ;
+        countTimeFour = 0 ;
+        step = 4 ;
       }
     }
     else if (arr[2][1] == 1 && bt3 == 1 && isActive == 1)
@@ -229,11 +251,11 @@ void loop()
       digitalWrite(LedThree, LOW);
       arr[2][1] = 0;
       isActive = 0;
-       if(step == 0 ){
+            if(step == 0 ){
         countTimeOne = millis() - countTimeOne;
         lcd_1.clear();
         lcd_1.setCursor(0 , 0);
-        lcd_1.print("TimeOne:  ");
+        lcd_1.print("TimeOne: ");
         lcd_1.print(countTimeOne);
         lcd_1.print(" mS ");
         Serial.print("countTimeOne : ");
@@ -244,7 +266,7 @@ void loop()
         countTimeTwo = millis() - countTimeTwo;
         lcd_1.clear();
         lcd_1.setCursor(0 , 0);
-        lcd_1.print("TimeTwo:  ");
+        lcd_1.print("TimeTwo: ");
         lcd_1.print(countTimeTwo);
         lcd_1.print(" mS ");
         Serial.print("countTimeTwo : ");
@@ -255,7 +277,14 @@ void loop()
         countTimeThree = millis() - countTimeThree;
         Serial.print("countTimeThree : ");
         Serial.println(countTimeThree);
-        sumTime = (countTimeOne + countTimeTwo + countTimeThree)/3000 ; 
+        lcd_1.print(" mS ");
+        step = 3 ;
+      }
+      else if(step == 3 ){
+        countTimeFour = millis() - countTimeFour;
+        Serial.print("countTimeFour : ");
+        Serial.println(countTimeFour);
+        sumTime = (countTimeFour + countTimeTwo + countTimeThree)/3000 ; 
         lcd_1.clear();
         lcd_1.setCursor(0 , 0);
         lcd_1.print("sumTime :  ");
@@ -267,7 +296,8 @@ void loop()
         countTimeThree = 0 ;
         countTimeTwo = 0 ;
         countTimeOne = 0 ;
-        step = 3 ;
+        countTimeFour = 0 ;
+        step = 4 ;
       }
     }
     time = millis();
