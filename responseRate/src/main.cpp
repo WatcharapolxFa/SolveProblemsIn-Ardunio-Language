@@ -40,7 +40,7 @@ long countTimeOne = 0;
 long countTimeTwo = 0;
 long countTimeThree = 0;
 long countTimeFour = 0;
-long sumTime = 0;
+float sumTime = 0;
 
 
 int step = 0;
